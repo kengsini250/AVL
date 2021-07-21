@@ -11,6 +11,7 @@ public:
     Node *left = nullptr,*right = nullptr;
 
     Node(){}
+    Node(int i){data = i;}
 };
 
 #endif // NODE_H
@@ -21,46 +22,64 @@ public:
     AVL(){}
 
     int getSize(){return size;}
-    bool getBalance(Node* n){
-        if(n == nullptr) return 0;
-        else return n->left->height - n->right->height;
-    }
 
     bool isBalance(){
         return isBalance(root);
     }
 
-    void add();
+    void add(Node*n){
+        if(root == nullptr)
+            root = n;
+        else
+            root = add(root,n);
+    }
 private:
     int size = 0;
     Node* root = nullptr;
 
-    bool isBalance(Node* n)
+    Node* add(Node* parent,Node* n)
     {
-        if(n == nullptr) return true;
-        int b = n->left->height - n->right->height;
-        if(b<0) b = -b;
-        if(b > 1) return false;
-        return isBalance(n->left) && isBalance(n->right);
-    }
-
-    Node* add(Node* n)
-    {
-        if(n == nullptr){
+        if(parent == nullptr){
             size++;
             return n;
         }
+
+        if(n->data < parent->data)
+            parent->left  = add(parent->left ,n);
+        if(n->data > parent->data)
+            parent->right = add(parent->right,n);
+
+        parent->height = 1 + MAX(getHeight(parent->left),getHeight(parent->right));
+
+        int balance = getBalance(parent);
+
+        //LL
+        if( balance>1 && getBalance(parent->left)>0 ) return LL(parent);
+        //LR
+        if( balance>1 && getBalance(parent->left)<0 ) return LR(parent);
+
+        //RR
+        if( balance<-1 && getBalance(parent->right)<0 ) return RR(parent);
+        //RL
+        if( balance<-1 && getBalance(parent->right)>0 ) return RL(parent);
+
+        return parent;
     }
 
     Node* LL(Node* parent)
     {
         Node* self = parent->left;
-        Node* self_right = self->right;
-        self->right = parent;
-        parent->left = self_right;
+        if(self->right != nullptr){
+            Node* self_right = self->right;
+            self->right = parent;
+            parent->left = self_right;
+        }else{
+            self->right = parent;
+            parent->left = nullptr;
+        }
 
-        parent->height = MAX(parent->left->height,parent->right->height)+1;
-        self->height = MAX(self->left->height,self->right->height)+1;
+        parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
+        self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
         return self;
     }
 
@@ -71,8 +90,8 @@ private:
         self->left = parent;
         parent->right = self_left;
 
-        parent->height = MAX(parent->left->height,parent->right->height)+1;
-        self->height = MAX(self->left->height,self->right->height)+1;
+        parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
+        self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
         return self;
     }
 
@@ -86,8 +105,8 @@ private:
         self->right = sonR_right;
         Node* new_self = LL(sonR);
 
-        parent->height = MAX(parent->left->height,parent->right->height)+1;
-        new_self->height = MAX(new_self->left->height,new_self->right->height)+1;
+        parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
+        new_self->height = MAX(getHeight(new_self->left),getHeight(new_self->right))+1;
         return new_self;
     }
 
@@ -101,8 +120,28 @@ private:
         self->left = sonL_right;
         Node* new_self = RR(sonL);
 
-        parent->height = MAX(parent->left->height,parent->right->height)+1;
-        new_self->height = MAX(new_self->left->height,new_self->right->height)+1;
+        parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
+        new_self->height = MAX(getHeight(new_self->left),getHeight(new_self->right))+1;
         return new_self;
+    }
+
+    bool isBalance(Node* n)
+    {
+        if(n == nullptr) return true;
+        int b = n->left->height - n->right->height;
+        if(b<0) b = -b;
+        if(b > 1) return false;
+        return isBalance(n->left) && isBalance(n->right);
+    }
+
+    int getBalance(Node* n){
+        if(n == nullptr) return 0;
+        else return getHeight(n->left) - getHeight(n->right);
+    }
+
+    int getHeight(Node*n)
+    {
+        if(n == nullptr) return 0;
+        else return n->height;
     }
 };
