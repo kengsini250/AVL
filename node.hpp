@@ -86,9 +86,14 @@ private:
     Node* RR(Node* parent)
     {
         Node* self = parent->right;
-        Node* self_left = self->left;
-        self->left = parent;
-        parent->right = self_left;
+        if(self->left != nullptr){
+            Node* self_left = self->left;
+            self->left = parent;
+            parent->right = self_left;
+        }else{
+            self->left = parent;
+            parent->right = nullptr;
+        }
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
@@ -103,7 +108,7 @@ private:
         parent->left = sonR;
         sonR->left = self;
         self->right = sonR_right;
-        Node* new_self = LL(sonR);
+        Node* new_self = LL(parent);
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         new_self->height = MAX(getHeight(new_self->left),getHeight(new_self->right))+1;
@@ -118,7 +123,7 @@ private:
         parent->right = sonL;
         sonL->right = self;
         self->left = sonL_right;
-        Node* new_self = RR(sonL);
+        Node* new_self = RR(parent);
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         new_self->height = MAX(getHeight(new_self->left),getHeight(new_self->right))+1;
