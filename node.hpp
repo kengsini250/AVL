@@ -9,6 +9,7 @@ public:
     int data;
     int height = 1;
     Node *left = nullptr,*right = nullptr;
+    Node *parent = nullptr;
 
     Node(){}
     Node(int i){data = i;}
@@ -33,9 +34,40 @@ public:
         else
             root = add(root,n);
     }
+
+    void remove(int v){
+        Node* pos = find(root,v);
+        if(pos != nullptr)
+            remove(root,v);
+    }
+
+    int find(int v){
+        Node* n = find(root,v);
+        if(n != nullptr)
+            return n->data;
+        else
+            return 0x7fffffff;
+    }
+
 private:
     int size = 0;
     Node* root = nullptr;
+
+    Node* find(Node* parent,int v){
+        if(parent == nullptr){
+            return nullptr;
+        }
+
+        if(v < parent->data) {
+            if(parent->left == nullptr) return nullptr;
+            else return find(parent->left,v);
+        }
+        else if(v > parent->data) {
+            if(parent->right == nullptr) return nullptr;
+            else return find(parent->right,v);
+        }
+        else return parent;
+    }
 
     Node* add(Node* parent,Node* n)
     {
@@ -44,15 +76,18 @@ private:
             return n;
         }
 
-        if(n->data < parent->data)
+        if(n->data < parent->data){
+            n->parent = parent;
             parent->left  = add(parent->left ,n);
-        if(n->data > parent->data)
+        }
+        if(n->data > parent->data){
+            n->parent = parent;
             parent->right = add(parent->right,n);
+        }
 
         parent->height = 1 + MAX(getHeight(parent->left),getHeight(parent->right));
 
         int balance = getBalance(parent);
-
         //LL
         if( balance>1 && getBalance(parent->left)>0 ) return LL(parent);
         //LR
@@ -66,6 +101,57 @@ private:
         return parent;
     }
 
+    Node* remove(Node* curr,int v){
+        if(curr == nullptr) return nullptr;
+
+
+        if(v < curr->data){
+            curr->left->parent = curr;
+            curr->left = remove(curr->left,v);
+        }
+        if(v > curr->data){
+            curr->right->parent = curr;
+            curr->right = remove(curr->right,v);
+        }
+
+        if(curr->parent == nullptr) return nullptr;
+        Node *parent = curr->parent;
+        if(v == curr->data){
+
+            if(curr->left == nullptr && curr->right == nullptr)
+            {
+                if(parent->left == curr){
+                    parent->left = nullptr;
+                    delete curr;
+                    size--;
+                }
+                if(parent->right == curr){
+                    parent->right = nullptr;
+                    delete curr;
+                    size--;
+                }
+            }
+            else if(curr->left == nullptr){}
+            else if(curr->right == nullptr){}
+
+            else // left = right != nullptr
+            {
+
+            }
+        }
+
+        int balance = getBalance(parent);
+        if( balance>1 && getBalance(parent->left)>0 ) return LL(parent);
+        //LR
+        if( balance>1 && getBalance(parent->left)<0 ) return LR(parent);
+
+        //RR
+        if( balance<-1 && getBalance(parent->right)<0 ) return RR(parent);
+        //RL
+        if( balance<-1 && getBalance(parent->right)>0 ) return RL(parent);
+        return curr;
+    }
+
     Node* LL(Node* parent)
     {
         Node* self = parent->left;
@@ -77,6 +163,9 @@ private:
             self->right = parent;
             parent->left = nullptr;
         }
+        //更新父节点
+        self->parent = parent->parent;
+        parent->parent = self;
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
@@ -94,6 +183,9 @@ private:
             self->left = parent;
             parent->right = nullptr;
         }
+        //更新父节点
+        self->parent = parent->parent;
+        parent->parent = self;
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
