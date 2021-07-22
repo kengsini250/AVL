@@ -106,11 +106,9 @@ private:
 
 
         if(v < curr->data){
-            curr->left->parent = curr;
             curr->left = remove(curr->left,v);
         }
         if(v > curr->data){
-            curr->right->parent = curr;
             curr->right = remove(curr->right,v);
         }
 
@@ -131,9 +129,15 @@ private:
                     size--;
                 }
             }
-            else if(curr->left == nullptr){}
-            else if(curr->right == nullptr){}
+            else if(curr->left == nullptr){
+                parent->right = curr->right;
+                curr->right->parent = parent;
+                delete curr;
+                size--;
+            }
+            else if(curr->right == nullptr){
 
+            }
             else // left = right != nullptr
             {
 
