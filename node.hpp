@@ -38,7 +38,7 @@ public:
     void remove(int v){
         Node* pos = find(root,v);
         if(pos != nullptr)
-            remove(root,v);
+            root = remove(root,v);
     }
 
     int find(int v){
@@ -104,15 +104,14 @@ private:
     Node* remove(Node* curr,int v){
         if(curr == nullptr) return nullptr;
 
-
         if(v < curr->data){
-            curr->left = remove(curr->left,v);
+            curr = remove(curr->left,v);
         }
         if(v > curr->data){
-            curr->right = remove(curr->right,v);
+            curr = remove(curr->right,v);
         }
 
-        if(curr->parent == nullptr) return nullptr;
+        if(curr->parent == nullptr) return curr;
         Node *parent = curr->parent;
         if(v == curr->data){
 
@@ -153,7 +152,7 @@ private:
         if( balance<-1 && getBalance(parent->right)<0 ) return RR(parent);
         //RL
         if( balance<-1 && getBalance(parent->right)>0 ) return RL(parent);
-        return curr;
+        return parent;
     }
 
     Node* LL(Node* parent)
