@@ -135,11 +135,35 @@ private:
                 size--;
             }
             else if(curr->right == nullptr){
-
+                parent->left = curr->left;
+                curr->left->parent = parent;
+                delete curr;
+                size--;
             }
             else // left = right != nullptr
             {
+                Node *min;
+                if(parent->left == curr){
+                    min = curr->right;
+                    while(min->left!=nullptr){
+                        min=min->left;
+                    }
+                    parent->left = min;
+                    curr->left = min->right;
+                }
+                if(parent->right == curr){
+                    min = curr->left;
+                    while(min->left!=nullptr){
+                        min=min->left;
+                    }
+                    parent->right = min;
+                    curr->right = min->left;
+                }
 
+                min->parent = parent;
+
+                delete curr;
+                size--;
             }
         }
 
