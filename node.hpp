@@ -1,28 +1,89 @@
 ﻿#ifndef NODE_HPP
 #define NODE_HPP
 
+#include <QObject>
+#include <QVector>
+
+#define delta 70
 #define MAX(l,r) (l>r?l:r)
 
 class Node
 {
 public:
-    int data;
+    int data=0;
     int height = 1;
     Node *left = nullptr,*right = nullptr;
     Node *parent = nullptr;
 
+    int x=0,y=0;
     Node(){}
     Node(int i){data = i;}
+    Node(int i,int x,int y){
+        data = i;
+        this->x = x;
+        this->y = y;
+    }
+
+    void PosLeftGoUp(Node*n=nullptr){
+        if(n!=nullptr){
+            x = n->x+delta;
+            y = n->y-delta;
+        }else{
+            x = x+delta;
+            y = y-delta;
+        }
+    }
+
+    void PosRighttGoUp(Node*n=nullptr){
+        if(n!=nullptr){
+            x = n->x-delta;
+            y = n->y-delta;
+        }else{
+            x = x-delta;
+            y = y-delta;
+        }
+    }
+
+    void PosGoRight(Node*n)
+    {
+        x = n->x+delta;
+        y = n->y+delta;
+    }
+
+    void PosGoLeft(Node*n)
+    {
+        x = n->x-delta;
+        y = n->y+delta;
+    }
+
+    void changePos(int xx,int yy){
+        x=xx;y=yy;
+    }
+
+    void changePos(Node*n){
+        int tx = n->x;
+        int ty = n->y;
+
+        n->x = x;
+        n->y = y;
+
+        x = tx;
+        y=ty;
+    }
 };
 
-#endif // NODE_H
 
-class AVL
+class AVL:public QObject
 {
+    Q_OBJECT
 public:
-    AVL(){}
+    AVL(QObject* p = nullptr) :QObject(p) {}
 
     int getSize(){return size;}
+
+    bool isEmpty(){
+        return root==nullptr;
+    }
 
     bool isBalance(){
         return isBalance(root);
@@ -49,9 +110,24 @@ public:
             return 0x7fffffff;
     }
 
+    QVector<Node*> getArr(){
+        arr.clear();
+        order(root);
+        return arr;
+    }
+
 private:
     int size = 0;
     Node* root = nullptr;
+    QVector<Node*> arr;
+
+    void order(Node*n){
+        if(n!=nullptr){
+            order(n->left);
+            arr.push_back(n);
+            order(n->right);
+        }
+    }
 
     Node* find(Node* parent,int v){
         if(parent == nullptr){
@@ -78,10 +154,16 @@ private:
 
         if(n->data < parent->data){
             n->parent = parent;
+            //更新节点坐标
+            n->x = parent->x-delta;
+            n->y = parent->y+delta;
             parent->left  = add(parent->left ,n);
         }
         if(n->data > parent->data){
             n->parent = parent;
+            //更新节点坐标
+            n->x = parent->x+delta;
+            n->y = parent->y+delta;
             parent->right = add(parent->right,n);
         }
 
@@ -182,10 +264,9 @@ private:
     Node* LL(Node* parent)
     {
         Node* self = parent->left;
-        if(self->right != nullptr){
-            Node* self_right = self->right;
+        if(self->right != nullptr){            
             self->right = parent;
-            parent->left = self_right;
+            parent->left = self->right;
         }else{
             self->right = parent;
             parent->left = nullptr;
@@ -196,6 +277,12 @@ private:
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
+
+        //更新节点坐标
+        self->changePos(parent);
+        parent->PosGoRight(self);
+        self->left->PosLeftGoUp();
+
         return self;
     }
 
@@ -269,3 +356,6 @@ private:
         else return n->height;
     }
 };
+
+
+#endif // NODE_H
