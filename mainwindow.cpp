@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
             avl->add(new Node(ui->lineEdit->text().toInt()));
 
         update();
+        ui->lineEdit->clear();
     });
     //avl->add(new Node(10,X,Y));
     //avl->add(new Node(8));

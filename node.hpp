@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QVector>
 
-#define delta 70
+#define Xdelta 100
+#define Ydelta 70
 #define MAX(l,r) (l>r?l:r)
 
 class Node
@@ -26,34 +27,34 @@ public:
 
     void PosLeftGoUp(Node*n=nullptr){
         if(n!=nullptr){
-            x = n->x+delta;
-            y = n->y-delta;
+            x = n->x+Xdelta;
+            y = n->y-Ydelta;
         }else{
-            x = x+delta;
-            y = y-delta;
+            x = x+Xdelta;
+            y = y-Ydelta;
         }
     }
 
     void PosRighttGoUp(Node*n=nullptr){
         if(n!=nullptr){
-            x = n->x-delta;
-            y = n->y-delta;
+            x = n->x-Xdelta;
+            y = n->y-Ydelta;
         }else{
-            x = x-delta;
-            y = y-delta;
+            x = x-Xdelta;
+            y = y-Ydelta;
         }
     }
 
     void PosGoRight(Node*n)
     {
-        x = n->x+delta;
-        y = n->y+delta;
+        x = n->x+Xdelta;
+        y = n->y+Ydelta;
     }
 
     void PosGoLeft(Node*n)
     {
-        x = n->x-delta;
-        y = n->y+delta;
+        x = n->x-Xdelta;
+        y = n->y+Ydelta;
     }
 
     void changePos(int xx,int yy){
@@ -155,15 +156,15 @@ private:
         if(n->data < parent->data){
             n->parent = parent;
             //更新节点坐标
-            n->x = parent->x-delta;
-            n->y = parent->y+delta;
+            n->x = parent->x-Xdelta;
+            n->y = parent->y+Ydelta;
             parent->left  = add(parent->left ,n);
         }
         if(n->data > parent->data){
             n->parent = parent;
             //更新节点坐标
-            n->x = parent->x+delta;
-            n->y = parent->y+delta;
+            n->x = parent->x+Xdelta;
+            n->y = parent->y+Ydelta;
             parent->right = add(parent->right,n);
         }
 
