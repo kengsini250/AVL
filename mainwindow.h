@@ -20,6 +20,8 @@ public:
 private:
     Ui::MainWindow *ui;
     AVL* avl;
+
+    void avlTest(int times);
 protected:
     void paintEvent(QPaintEvent*)override;
 };

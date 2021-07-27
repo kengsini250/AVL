@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVector>
 
+#include "test.h"
+
 #define Xdelta 100
 #define Ydelta 70
 #define MAX(l,r) (l>r?l:r)
@@ -155,16 +157,20 @@ private:
 
         if(n->data < parent->data){
             n->parent = parent;
+#if DRAW
             //更新节点坐标
             n->x = parent->x-Xdelta;
             n->y = parent->y+Ydelta;
+#endif
             parent->left  = add(parent->left ,n);
         }
         if(n->data > parent->data){
             n->parent = parent;
+#if DRAW
             //更新节点坐标
             n->x = parent->x+Xdelta;
             n->y = parent->y+Ydelta;
+#endif
             parent->right = add(parent->right,n);
         }
 
@@ -212,12 +218,32 @@ private:
                 }
             }
             else if(curr->left == nullptr){
-                parent->right = curr->right;
-                curr->right->parent = parent;
-                delete curr;
-                size--;
+                if (parent->left == curr) {
+                    parent->left = curr->right;
+                    curr->right->parent = parent;
+                    delete curr;
+                    size--;
+                }
+                if (parent->right == curr) {
+                    parent->right = curr->right;
+                    curr->right->parent = parent;
+                    delete curr;
+                    size--;
+                }
             }
             else if(curr->right == nullptr){
+                if (parent->left == curr) {
+                    parent->left = curr->left;
+                    curr->left->parent = parent;
+                    delete curr;
+                    size--;
+                }
+                if (parent->right == curr) {
+                    parent->right = curr->left;
+                    curr->left->parent = parent;
+                    delete curr;
+                    size--;
+                }
                 parent->left = curr->left;
                 curr->left->parent = parent;
                 delete curr;
@@ -251,14 +277,17 @@ private:
         }
 
         int balance = getBalance(parent);
-        if( balance>1 && getBalance(parent->left)>0 ) return LL(parent);
+        int bL = getBalance(parent->left);
+        int bR = getBalance(parent->right);
+        //LL
+        if(getBalance(parent) >1 && getBalance(parent->left)>=0 ) return LL(parent);
         //LR
-        if( balance>1 && getBalance(parent->left)<0 ) return LR(parent);
+        if(getBalance(parent) >1 && getBalance(parent->left)<0 ) return LR(parent);
 
         //RR
-        if( balance<-1 && getBalance(parent->right)<0 ) return RR(parent);
+        if(getBalance(parent) <-1 && getBalance(parent->right)<=0 ) return RR(parent);
         //RL
-        if( balance<-1 && getBalance(parent->right)>0 ) return RL(parent);
+        if(getBalance(parent) <-1 && getBalance(parent->right)>0 ) return RL(parent);
         return parent;
     }
 
@@ -275,15 +304,24 @@ private:
         //更新父节点
         self->parent = parent->parent;
         parent->parent = self;
+        //更新父节点的子节点
+        if (self->parent != nullptr) {
+            if (self->parent->left == parent) {
+                self->parent->left = self;
+            }
+            if (self->parent->right == parent) {
+                self->parent->right = self;
+            }
+        }
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
-
+#if DRAW
         //更新节点坐标
         self->changePos(parent);
         parent->PosGoRight(self);
         self->left->PosLeftGoUp();
-
+#endif
         return self;
     }
 
@@ -301,6 +339,15 @@ private:
         //更新父节点
         self->parent = parent->parent;
         parent->parent = self;
+        //更新父节点的子节点
+        if (self->parent != nullptr) {
+            if (self->parent->left == parent) {
+                self->parent->left = self;
+            }
+            if (self->parent->right == parent) {
+                self->parent->right = self;
+            }
+        }
 
         parent->height = MAX(getHeight(parent->left),getHeight(parent->right))+1;
         self->height = MAX(getHeight(self->left),getHeight(self->right))+1;
