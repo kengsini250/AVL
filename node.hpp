@@ -275,10 +275,11 @@ private:
                 size--;
             }
         }
-
+#if TEST
         int balance = getBalance(parent);
         int bL = getBalance(parent->left);
         int bR = getBalance(parent->right);
+#endif
         //LL
         if(getBalance(parent) >1 && getBalance(parent->left)>=0 ) return LL(parent);
         //LR
@@ -295,8 +296,9 @@ private:
     {
         Node* self = parent->left;
         if(self->right != nullptr){            
+            Node* temp = self->right;
             self->right = parent;
-            parent->left = self->right;
+            parent->left = temp;
         }else{
             self->right = parent;
             parent->left = nullptr;
